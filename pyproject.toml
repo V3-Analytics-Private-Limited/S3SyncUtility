@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "s3syncutility"
+version = "0.1.0"
+description = "Sync local directories with Amazon S3."
+authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+boto3 = "^1.28.30"
+configparser = "^6.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
