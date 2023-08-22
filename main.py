@@ -1,7 +1,9 @@
 import hashlib
 import os
+import sys
 import boto3
 import argparse
+from configparser import ConfigParser
 
 def calculate_checksum(file_path):
     hasher = hashlib.md5()
@@ -40,9 +42,22 @@ def main():
     parser.add_argument("--download", help="Download directories/files from S3", action="store_true")
     args = parser.parse_args()
 
-    local_dir = './'
-    s3_bucket = ''
-    s3_prefix = ''
+    local_dir = os.path.dirname(os.path.realpath(__file__))
+
+    config = ConfigParser()
+    try:
+        config.read(os.path.join(local_dir, '.config.ini'))
+        s3_bucket = config.get('S3_CONFIG', 'S3_BUCKET_NAME')
+        s3_prefix = config.get('S3_CONFIG', 'S3_PREFIX')
+        project_name = config.get('S3_CONFIG', 'PROJECT_NAME')
+        s3_prefix = f"{s3_prefix}/{project_name}"
+    except Exception:
+        print("Error: Please make sure the .config.ini file is correctly configured with [S3_CONFIG] section.")
+        sys.exit(1)
+
+    # local_dir = './'
+    # s3_bucket = ''
+    # s3_prefix = ''
 
     if args.upload:
         upload_to_s3(local_dir, s3_bucket, s3_prefix)

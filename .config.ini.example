@@ -1,0 +1,5 @@
+[S3_CONFIG]
+
+S3_BUCKET_NAME=your-bucket-name
+S3_PREFIX=some/prefix
+PROJECT_NAME=some_project_name
