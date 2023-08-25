@@ -1,9 +1,15 @@
 import hashlib
 import os
 import sys
-import boto3
 import argparse
-from configparser import ConfigParser
+
+try:
+    import boto3
+    from configparser import ConfigParser
+except ModuleNotFoundError as e:
+    missing_module = str(e).split("'")[1]
+    print(f"Error: This script requires the '{missing_module}' module. Please install it using 'pip install {missing_module}'")
+    sys.exit(1)
 
 def calculate_checksum(file_path):
     hasher = hashlib.md5()
@@ -55,23 +61,22 @@ def main():
         s3_prefix_type = config.get('S3_CONFIG', 'S3_PREFIX_TYPE')
         s3_prefix_category = config.get('S3_CONFIG', 'S3_PREFIX_CATEGORY')
         project_name = config.get('S3_CONFIG', 'PROJECT_NAME')
-
-        s3_prefix = f"{s3_prefix_type}/{s3_prefix_category}/{project_name}"
+        ignored_items = [item.strip() for item in config.get('S3_CONFIG', 'EXCLUDE', fallback='').split(',')]
 
     except Exception:
         print("Error: Please make sure the .config.ini file is correctly configured with [S3_CONFIG] section.")
         sys.exit(1)
 
-    # local_dir = './'
-    # s3_bucket = ''
-    # s3_prefix = ''
+    s3_prefix = f"{s3_prefix_type}/{s3_prefix_category}/{project_name}"
+
+    exclude_list = args.exclude + ignored_items + ['main.py', '.config.ini', '.git']
 
     if args.upload:
-        upload_to_s3(local_dir, s3_bucket, s3_prefix, args.exclude + ['main.py', '.config.ini'])
+        upload_to_s3(local_dir, s3_bucket, s3_prefix, exclude_list)
         print("Upload process completed.")
 
     elif args.download:
-        download_from_s3(s3_bucket, s3_prefix, local_dir,  args.exclude + ['main.py', '.config.ini'])
+        download_from_s3(s3_bucket, s3_prefix, local_dir,  exclude_list)
         print("Download process completed.")
 
 if __name__ == "__main__":
