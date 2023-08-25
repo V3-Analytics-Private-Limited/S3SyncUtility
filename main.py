@@ -18,15 +18,31 @@ def calculate_checksum(file_path):
             hasher.update(chunk)
     return hasher.hexdigest()
 
-def upload_to_s3(local_dir, s3_bucket, s3_prefix, exclude_list, dry_run=False):
+def get_total_objects(directory, exclude_list):
+    total_objects = 0
+    for _, dirs, files in os.walk(directory):
+        dirs[:] = [d for d in dirs if d not in exclude_list]
+        for file in files:
+            if file not in exclude_list:
+                total_objects += 1
+    return total_objects
+
+def get_total_objects_s3(bucket, prefix):
     s3 = boto3.client('s3')
 
-    for root, dirs, files in os.walk(local_dir):
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+    total_objects = len(response.get('Contents', []))
+    return total_objects
+
+def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False):
+    s3 = boto3.client('s3')
+
+    for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in exclude_list]
         for file in files:
             if file not in exclude_list:
                 local_path = os.path.join(root, file)
-                relative_path = os.path.relpath(local_path, local_dir)
+                relative_path = os.path.relpath(local_path, directory)
                 s3_key = os.path.join(s3_prefix, relative_path)
                 
                 if dry_run:
@@ -59,11 +75,11 @@ def main():
     parser.add_argument("--exclude", nargs='*', help="Exclude files or directories from upload/download", default=[])
     args = parser.parse_args()
 
-    local_dir = os.path.dirname(os.path.realpath(__file__))
+    directory = os.getcwd() # os.path.dirname(os.path.realpath(__file__))
 
     try:
         config = ConfigParser()
-        config.read(os.path.join(local_dir, '.config.ini'))    
+        config.read(os.path.join(directory, '.config.ini'))    
         s3_bucket = config.get('S3_CONFIG', 'S3_BUCKET_NAME')
         s3_prefix_type = config.get('S3_CONFIG', 'S3_PREFIX_TYPE')
         s3_prefix_category = config.get('S3_CONFIG', 'S3_PREFIX_CATEGORY')
@@ -79,14 +95,30 @@ def main():
     exclude_list = args.exclude + ignored_items + ['main.py', '.config.ini', '.git']
 
     if args.upload:
-        upload_to_s3(local_dir, s3_bucket, s3_prefix, exclude_list, args.dry_run)
-        if not args.dry_run:
-            print("Upload process completed.")
+        print("Uploading to S3:")
+        print(f"Bucket: {s3_bucket}")
+        print(f"Uploading To: {s3_prefix_type}/{s3_prefix_category}")
+        print(f"Total Objects: {get_total_objects(directory, exclude_list)}")
+        confirm = input("Proceed with upload? (yes/no): ").lower()
+        if confirm == 'yes':
+            upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, args.dry_run)
+            if not args.dry_run:
+                print("Upload process completed.")
+        else:
+            print("Upload operation canceled.")
 
     elif args.download:
-        download_from_s3(s3_bucket, s3_prefix, local_dir, exclude_list, args.dry_run)
-        if not args.dry_run:
-            print("Download process completed.")
+        print("Downloading from S3:")
+        print(f"Bucket: {s3_bucket}")
+        print(f"Downloading From: {s3_prefix_type}/{s3_prefix_category}")
+        print(f"Total Objects: {get_total_objects_s3(s3_bucket, s3_prefix)}")
+        confirm = input("Proceed with download? (yes/no): ").lower()
+        if confirm == 'yes':
+            download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, args.dry_run)
+            if not args.dry_run:
+                print("Download process completed.")
+        else:
+            print("Download operation canceled.")
 
 if __name__ == "__main__":
     main()
