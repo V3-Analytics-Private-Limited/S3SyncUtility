@@ -1,5 +1,6 @@
 [S3_CONFIG]
 
 S3_BUCKET_NAME=your-bucket-name
-S3_PREFIX=some/prefix
+S3_PREFIX_TYPE=internal   # or "external"
+S3_PREFIX_CATEGORY=datasets   # or "models"
 PROJECT_NAME=some_project_name
