@@ -1,24 +1,24 @@
 # S3SyncUtility
 
-S3SyncUtility is a Python script that enables you to easily upload and download directories to and from Amazon S3. This script uses the Boto3 library to interact with S3, allowing you to synchronize your local directories with S3 buckets in an incremental manner.
+**S3SyncUtility** is a Python tool using Boto3 to simplify syncing local directories with Amazon S3, for easy uploads and downloads.
 
 ## Prerequisites
 
-- Python ^3.9
-- Boto3 (install using `pip install boto3`)
-- Configuration file parser (install using `pip install configparser`)
+- **Python 3.9 or higher**
+- **Boto3** (Install using `pip install boto3`)
+- **Configuration file parser** (Install using `pip install configparser`)
 
 ## Configuration (`.config.ini`)
 
-The `.config.ini` file allows you to customize how your project interacts with the S3 bucket.
+The `.config.ini` file lets you customize your interaction with the S3 bucket.
 
 ### S3 Configuration
 
 - `S3_BUCKET_NAME`: Name of your S3 bucket.
-- `S3_PREFIX_TYPE`: Set to **`internal`** or **`external`**.
-- `S3_PREFIX_CATEGORY`: Choose **`datasets`** or **`models`**.
-- `PROJECT_NAME`: Your project's name.
-- `EXCLUDE` (optional): Files or directories to exclude.
+- `S3_PREFIX_TYPE`: Choose between "**internal**" or "**external**".
+- `S3_PREFIX_CATEGORY`: Select from "**datasets**" or "**models**".
+- `PROJECT_NAME`: Name of your project.
+- `EXCLUDE` (optional): Specify files or directories to exclude.
 
 **Example:**
 
