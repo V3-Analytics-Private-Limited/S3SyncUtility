@@ -34,9 +34,10 @@ def main():
     upload_parser.add_argument("--s3-prefix", help="Prefix to use for S3 object keys", default=s3_prefix)
     upload_parser.add_argument("--exclude", nargs='*', help="Exclude files or directories from upload", default=[])
     upload_parser.add_argument("--dry-run", help="Simulate the upload process", action="store_true")
+    upload_parser.add_argument("--progress", help="Display progress statistics.", action="store_true")
     upload_parser.add_argument("--verbose", help="Verbosity of the upload process", action="store_true")
     upload_parser.set_defaults(func=lambda args: upload.upload_to_s3(
-        args.directory, args.s3_bucket, args.s3_prefix, args.exclude + exclude_list, args.dry_run, args.verbose
+        args.directory, args.s3_bucket, args.s3_prefix, args.exclude + exclude_list, args.dry_run, args.progress, args.verbose
     ))
 
     download_parser = subparsers.add_parser(
@@ -50,9 +51,10 @@ def main():
     download_parser.add_argument("--directory", help="Local directory to save downloaded files", default=directory)
     download_parser.add_argument("--exclude", nargs='*', help="Exclude files or directories from download", default=[])
     download_parser.add_argument("--dry-run", help="Simulate the download process", action="store_true")
+    download_parser.add_argument("--progress", help="Display progress statistics.", action="store_true")
     download_parser.add_argument("--verbose", help="Verbosity of the download process", action="store_true")
     download_parser.set_defaults(func=lambda args: download.download_from_s3(
-        args.s3_bucket, args.s3_prefix, args.directory, args.exclude + exclude_list, args.dry_run, args.verbose
+        args.s3_bucket, args.s3_prefix, args.directory, args.exclude + exclude_list, args.dry_run, args.progress, args.verbose
     ))
 
     args = parser.parse_args()

@@ -34,3 +34,16 @@ def get_total_download_objects(bucket, prefix):
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
     total_objects = len(response.get('Contents', []))
     return total_objects
+
+def format_time(seconds):
+    """Format seconds into a string representation of time in HH:MM:SS format.
+
+    Args:
+        seconds (int): The total number of seconds.
+
+    Returns:
+        str: A formatted string representation of time in HH:MM:SS format.
+    """
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return f"{int(h):02d}:{int(m):02d}:{int(s):02d}"
