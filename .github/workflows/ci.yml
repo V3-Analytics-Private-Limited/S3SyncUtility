@@ -1,16 +1,15 @@
-name: CI/CD Pipeline
+name: Release Workflow
 
 on:
-  push:
-    branches:
-      - development
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - "Pull Request CI"
+    types:
+      - completed
 
 jobs:
-  build:
-    name: Build, and Lint
+  release:
+    name: Build, Package, and Release
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +27,12 @@ jobs:
           pip install poetry
           poetry install
 
-      # - name: Run tests
-      #   run: poetry run pytest
+      - name: Package wheel
+        run: poetry build
 
-      - name: Lint code
-        run: poetry run flake8 s3sync
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: dist/*.whl
