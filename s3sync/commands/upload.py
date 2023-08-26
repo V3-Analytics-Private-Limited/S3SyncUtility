@@ -81,16 +81,16 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, p
                                 sys.stdout.flush()
 
                                 if dry_run:
-                                    print(f"Simulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")
+                                    print(f"\nSimulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")
                                 else:
                                     # print(f"Uploading {file} to S3 bucket {s3_bucket}")
                                     if verbose:
-                                        print(f"Uploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
+                                        print(f"\nUploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
                                     s3.upload_file(local_path, s3_bucket, s3_key)
                                     last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
                                     state[local_path] = {'hash': local_checksum, 'size': file_size, 'last_modified': last_modified_formated, 'extension': os.path.splitext(file)[1]}
                                     if verbose:
-                                        print(f"Uploaded {file} as {s3_key}")
+                                        print(f"\nUploaded {file} as {s3_key}")
                 save_state(state)
                 print("\nUpload completed.")
             except (BotoCoreError, NoCredentialsError) as e:
