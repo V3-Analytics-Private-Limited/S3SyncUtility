@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "s3sync"
-version = "2.0.0"
+version = "2.1.0"
 description = "Sync directories/files with Amazon S3."
 authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
 license = "MIT"
