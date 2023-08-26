@@ -19,7 +19,7 @@ def load_s3_config():
         # s3_prefix_type = config.get('S3_CONFIG', 'S3_PREFIX_TYPE')
         # s3_prefix_category = config.get('S3_CONFIG', 'S3_PREFIX_CATEGORY')
         # project_name = config.get('S3_CONFIG', 'PROJECT_NAME')
-        s3_prefix = config.get('S3_PREFIX', 'S3_PREFIX')
+        s3_prefix = config.get('S3_CONFIG', 'S3_PREFIX')
         ignored_items = [item.strip() for item in config.get('S3_CONFIG', 'EXCLUDE', fallback='').split(',')]
     except Exception as e:
         print(f"Warning: {e}\nNo valid configuration found. Use 's3sync config init' or provide flags.\nDefaults applied.\n")
@@ -27,7 +27,7 @@ def load_s3_config():
         s3_bucket, s3_prefix, ignored_items = '', '', []        
 
     # s3_prefix = f"{s3_prefix_type}/{s3_prefix_category}/{project_name}" if s3_bucket else ""
-    exclude_list = ignored_items + ['.config.ini', '.git']
+    exclude_list = ignored_items + ['.config.ini', '.git', '.state.json']
 
     return s3_bucket, s3_prefix, exclude_list
 

@@ -1,23 +1,7 @@
 import os
-import hashlib
 import boto3
 
-def calculate_checksum(file_path):
-    """Calculate the MD5 checksum of a file.
-
-    Args:
-        file_path (str): The path to the file.
-
-    Returns:
-        str: The MD5 checksum of the file.
-    """
-    hasher = hashlib.md5()
-    with open(file_path, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-def get_total_objects(directory, exclude_list):
+def get_total_upload_objects(directory, exclude_list):
     """Count the total number of objects (files and directories) in a directory.
 
     Args:
@@ -35,7 +19,7 @@ def get_total_objects(directory, exclude_list):
                 total_objects += 1
     return total_objects
 
-def get_total_objects_s3(bucket, prefix):
+def get_total_download_objects(bucket, prefix):
     """Count the total number of objects (files and directories) in an S3 bucket with a given prefix.
 
     Args:
