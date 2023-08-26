@@ -7,7 +7,7 @@
 You can install S3Sync using `pip` by providing the Git repository URL:
 
 ```bash
-pip install git+https://github.com/GeonsV3Collab/S3SyncUtility.git@devlopment
+pip install git+https://github.com/GeonsV3Collab/S3SyncUtility.git@development
 ```
 
 
