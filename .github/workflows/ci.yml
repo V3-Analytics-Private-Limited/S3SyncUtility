@@ -1,11 +1,12 @@
-name: Release Workflow
+name: CI/CD Pipeline
 
 on:
-  workflow_run:
-    workflows:
-      - "Pull Request CI"
-    types:
-      - completed
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - main
 
 jobs:
   release:
