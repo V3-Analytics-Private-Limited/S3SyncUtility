@@ -82,7 +82,7 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
                             sys.stdout.write("\r" + progress_line)
                             sys.stdout.flush()
                         if dry_run:
-                            print(f"Simulating: Would download {s3_key} from S3 bucket {s3_bucket} to {local_path}")
+                            print(f"\nSimulating: Would download {s3_key} from S3 bucket {s3_bucket} to {local_path}")
                         else:
                             # print(f"Downloading {s3_key} from S3 bucket {s3_bucket}")
                             if verbose:
@@ -91,7 +91,7 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
                             os.makedirs(os.path.dirname(local_path), exist_ok=True)
                             s3.download_file(s3_bucket, s3_key, local_path)
                             if verbose:
-                                print(f"Downloaded {s3_key} as {local_path}")
+                                print(f"\nDownloaded {s3_key} as {local_path}")
                             state[local_path] = {'hash': remote_etag, 'last_modified': last_modified.isoformat(), 'extension': os.path.splitext(s3_key)[-1]}
                 save_state(state)
                 print("\nDownload completed.")
