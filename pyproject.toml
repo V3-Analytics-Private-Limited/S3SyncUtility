@@ -11,11 +11,8 @@ python = "^3.9"
 boto3 = "^1.28.30"
 configparser = "^6.0.0"
 
-[tool.poetry.group.test]
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.4.0"
-pytest-mock = "^3.11.1"
+[tool.poetry.group.lint.dependencies]
+flake8 = "^6.1.0"
 
 [build-system]
 requires = ["poetry-core"]

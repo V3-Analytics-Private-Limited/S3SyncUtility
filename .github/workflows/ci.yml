@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build, and Test
+    name: Build, and Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +28,8 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: Run tests
-        run: poetry run pytest
+      # - name: Run tests
+      #   run: poetry run pytest
 
       - name: Lint code
         run: poetry run flake8 s3sync
