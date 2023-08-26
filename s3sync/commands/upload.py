@@ -7,7 +7,6 @@ from s3sync.commands.size import get_total_upload_size, format_size
 from s3sync.commands.common import get_total_upload_objects
 from s3sync.commands.state_management import load_state, save_state, calculate_checksum
 
-
 def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, verbose=False):
     """Upload files from a directory to an S3 bucket.
 
@@ -20,7 +19,6 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
         verbose (bool, optional): Increase verbosity of the upload process. Defaults to False.
     """
 
-    # Check if required arguments are provided
     if not s3_bucket or not s3_prefix:
         print("Error: Both --s3-bucket [S3_BUCKET] and --s3-prefix [S3_PREFIX] are required.")
         sys.exit(1)
@@ -36,10 +34,8 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
         print(f"Total Objects: {total_objects}")
         print(f"Total upload size: {format_size(upload_size)}")
 
-        # Confirm the upload
         confirm = input("Proceed with upload? (yes/no): ").lower()
         if confirm == 'yes':
-            # state_file_path = os.path.join(os.getcwd(), '.state.json')
             state = load_state()
 
             try:
@@ -54,7 +50,10 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
 
                             # Check if the file is already uploaded or unchanged
                             local_checksum = calculate_checksum(local_path)
-                            if local_path in state and local_checksum == state[local_path]:
+                            file_size = os.path.getsize(local_path)
+                            last_modified = os.path.getmtime(local_path)  # Get the last modified timestamp
+
+                            if local_path in state and local_checksum == state[local_path]['hash']:
                                 if verbose:
                                     print(f"Skipping {file} as it's already uploaded and unchanged.")
                             else:
@@ -66,7 +65,7 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
                                     if verbose:
                                         print(f"Uploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
                                     s3.upload_file(local_path, s3_bucket, s3_key)
-                                    state[local_path] = local_checksum
+                                    state[local_path] = {'hash': local_checksum, 'size': file_size, 'last_modified': last_modified, 'extension': os.path.splitext(file)[1]}
                                     if verbose:
                                         print(f"Uploaded {file} as {s3_key}")
 

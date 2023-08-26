@@ -3,15 +3,14 @@ import os
 import boto3
 
 from botocore.exceptions import BotoCoreError, NoCredentialsError
-from s3sync.commands.state_management import load_state, save_state
+from s3sync.commands.state_management import load_state, save_state, calculate_checksum
 from s3sync.commands.size import get_total_download_size, format_size
 from s3sync.commands.common import get_total_download_objects
 
+
 def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=False, verbose=False):
-    # Load the state from the .state.json file
     state = load_state()
 
-    # Initialize the S3 client
     s3 = boto3.client('s3')
 
     try:
@@ -25,7 +24,6 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
         print(f"Total Objects: {total_objects}")
         print(f"Total download size: {format_size(download_size)}")
 
-        # Confirm the download
         confirm = input("Proceed with download? (yes/no): ").lower()
         if confirm == 'yes':
             try:
@@ -35,18 +33,17 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
                     if not any(item in s3_key for item in exclude_list):
                         local_path = os.path.join(directory, os.path.relpath(s3_key, s3_prefix))
 
-                        # Initialize remote_etag
-                        remote_etag = None
+                        # Get the remote ETag (checksum) and last modified timestamp
+                        remote_etag = obj.get('ETag', '').strip('"')
+                        last_modified = obj.get('LastModified', None)
 
                         if os.path.exists(local_path):
-                            # Get the remote ETag (checksum)
-                            remote_etag = obj.get('ETag', '').strip('"')
+                            # Get the local checksum and last modified timestamp from state
+                            local_checksum = state.get(local_path, {}).get('hash', '')
+                            local_last_modified = state.get(local_path, {}).get('last_modified', None)
 
-                            # Get the local checksum from state
-                            local_checksum = state.get(local_path, '')
-
-                            # Compare local checksum with remote ETag
-                            if local_checksum == remote_etag:
+                            # Compare local checksum and last modified timestamp with remote ETag and LastModified
+                            if local_checksum == remote_etag and local_last_modified == last_modified:
                                 if verbose:
                                     print(f"Skipping {s3_key} as it's already downloaded and unchanged.")
                                 continue
@@ -63,8 +60,8 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
                             s3.download_file(s3_bucket, s3_key, local_path)
                             if verbose:
                                 print(f"Downloaded {s3_key} as {local_path}")
-                            # Update state with new checksum
-                            state[local_path] = remote_etag
+                            # Update state with new checksum, extension, and last modified timestamp
+                            state[local_path] = {'hash': remote_etag, 'last_modified': last_modified, 'extension': os.path.splitext(s3_key)[-1]}
                 # Save updated state
                 save_state(state)
             except (BotoCoreError, NoCredentialsError) as e:

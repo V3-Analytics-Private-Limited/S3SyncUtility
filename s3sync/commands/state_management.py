@@ -2,20 +2,21 @@ import os
 import json
 import hashlib
 
-def calculate_checksum(file_path):
+def calculate_checksum(file_path, block_size=8192):
     """Calculate the MD5 checksum of a file.
 
     Args:
         file_path (str): The path to the file.
+        block_size (int, optional): Size of data blocks for checksum calculation. Default is 8192 bytes.
 
     Returns:
         str: The MD5 checksum of the file.
     """
-    hasher = hashlib.md5()
-    with open(file_path, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
+    checksum = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for block in iter(lambda: f.read(block_size), b""):
+            checksum.update(block)
+    return checksum.hexdigest()
 
 def load_state():
     """
