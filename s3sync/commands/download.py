@@ -35,6 +35,9 @@ def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=Fals
                     if not any(item in s3_key for item in exclude_list):
                         local_path = os.path.join(directory, os.path.relpath(s3_key, s3_prefix))
 
+                        # Initialize remote_etag
+                        remote_etag = None
+
                         if os.path.exists(local_path):
                             # Get the remote ETag (checksum)
                             remote_etag = obj.get('ETag', '').strip('"')
