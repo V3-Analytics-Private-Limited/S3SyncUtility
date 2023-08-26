@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "s3syncutility"
+name = "s3sync"
 version = "0.1.0"
-description = "Sync local directories with Amazon S3."
+description = "Sync directories/files with Amazon S3."
 authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
 license = "MIT"
 readme = "README.md"
@@ -15,3 +15,6 @@ configparser = "^6.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+s3sync = "s3sync.__main__:main"
