@@ -1,14 +1,16 @@
 import sys
 import os
 import boto3
+import time
 from datetime import datetime
 
 from botocore.exceptions import BotoCoreError, NoCredentialsError
 from s3sync.commands.size import get_total_upload_size, format_size
-from s3sync.commands.common import get_total_upload_objects
+from s3sync.commands.common import get_total_upload_objects, format_time
 from s3sync.commands.state_management import load_state, save_state, calculate_checksum
 
-def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, verbose=False):
+
+def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, progress=False, verbose=False):
     """Upload file(s) from a directory to an S3 bucket.
 
     Args:
@@ -19,7 +21,6 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
         dry_run (bool, optional): Simulate the upload process without actual upload. Defaults to False.
         verbose (bool, optional): Increase verbosity of the upload process. Defaults to False.
     """
-
     # if not s3_bucket or not s3_prefix:
     #     print("Error: Both --s3-bucket [S3_BUCKET] and --s3-prefix [S3_PREFIX] are required.")
     #     sys.exit(1)
@@ -38,7 +39,6 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
         print(f"Bucket: {s3_bucket}")
         print(f"Uploading To: {s3_prefix}")
 
-        # Calculate total objects and upload size
         total_objects = get_total_upload_objects(directory, exclude_list)
         upload_size = get_total_upload_size(directory, exclude_list)
         print(f"Total Objects: {total_objects}")
@@ -47,6 +47,11 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
         confirm = input("Proceed with upload? (yes/no): ").lower()
         if confirm == 'yes':
             state = load_state()
+
+            uploaded_files = 0
+            total_files = total_objects
+            skipped_files = 0
+            start_time = time.time()
 
             try:
                 s3 = boto3.client('s3')
@@ -57,29 +62,37 @@ def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, v
                             local_path = os.path.join(root, file)
                             relative_path = os.path.relpath(local_path, directory)
                             s3_key = os.path.join(s3_prefix, relative_path)
-                            # Check if the file is already uploaded or unchanged
                             local_checksum = calculate_checksum(local_path)
                             file_size = os.path.getsize(local_path)
-                            last_modified = os.path.getmtime(local_path)  # Get the last modified timestamp
+                            last_modified = os.path.getmtime(local_path)
                             if local_path in state and local_checksum == state[local_path]['hash']:
                                 if verbose:
                                     print(f"Skipping {file} as it's already uploaded and unchanged.")
-                            else:
-                                # Upload the file(s)
+                                skipped_files += 1
+                                continue
+                            uploaded_files += 1
+                            if progress:
+                                progress_percentage = ((uploaded_files - skipped_files) / (total_files - skipped_files)) * 100
+                                remaining_files = total_files - uploaded_files
+                                time_elapsed = time.time() - start_time
+                                time_remaining = (time_elapsed / (uploaded_files - skipped_files)) * remaining_files
+                                progress_line = f"Progress: {progress_percentage:.2f}% | Uploaded: {uploaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
+                                sys.stdout.write("\r" + progress_line)
+                                sys.stdout.flush()
+
                                 if dry_run:
                                     print(f"Simulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")
                                 else:
-                                    print(f"Uploading {file} to S3 bucket {s3_bucket}")
+                                    # print(f"Uploading {file} to S3 bucket {s3_bucket}")
                                     if verbose:
                                         print(f"Uploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
                                     s3.upload_file(local_path, s3_bucket, s3_key)
-                                    # Convert last_modified timestamp to string representation
                                     last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
                                     state[local_path] = {'hash': local_checksum, 'size': file_size, 'last_modified': last_modified_formated, 'extension': os.path.splitext(file)[1]}
                                     if verbose:
                                         print(f"Uploaded {file} as {s3_key}")
-                # Save updated state
                 save_state(state)
+                print("\nUpload completed.")
             except (BotoCoreError, NoCredentialsError) as e:
                 print(f"Error occurred: {e}")
         else:
