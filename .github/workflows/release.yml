@@ -2,8 +2,10 @@ name: Release
 
 on:
   push:
-    branches:
-      - development
+    tags:
+      - '*.*.*'
+    branches-ignore:
+      - 'dependabot/**'
 
 jobs:
   release:
@@ -37,6 +39,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/*"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_GITHUB_TOKEN }}
           draft: false
           prerelease: steps.check-version.outputs.prerelease == 'true'
