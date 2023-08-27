@@ -9,7 +9,7 @@ from s3sync_util.commands.size import get_total_download_size, format_size
 from s3sync_util.commands.common import get_total_download_objects, format_time
 
 
-def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=False, progress=False, verbose=False):
+def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:list, dry_run:bool=False, progress:bool=False, verbose:bool=False) -> None:
     """Download files(s) from an S3 bucket to a local directory.
     Args:
         s3_bucket (str): The name of the S3 bucket.

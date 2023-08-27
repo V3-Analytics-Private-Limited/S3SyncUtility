@@ -1,9 +1,7 @@
-from datetime import datetime
 import os
 import boto3
 
-from s3sync_util.commands.state_management import calculate_checksum
-def get_total_upload_objects(directory, exclude_list):
+def get_total_upload_objects(directory:str, exclude_list:list) -> int:
     """Count the total number of objects (files and directories) in a directory.
 
     Args:
@@ -21,7 +19,7 @@ def get_total_upload_objects(directory, exclude_list):
                 total_objects += 1
     return total_objects
 
-def get_total_download_objects(bucket, prefix):
+def get_total_download_objects(bucket:str, prefix:str) -> int:
     """Count the total number of objects (files and directories) in an S3 bucket with a given prefix.
 
     Args:
@@ -37,7 +35,7 @@ def get_total_download_objects(bucket, prefix):
     total_objects = len(response.get('Contents', []))
     return total_objects
 
-def format_time(seconds):
+def format_time(seconds:int) -> str:
     """Format seconds into a string representation of time in HH:MM:SS format.
 
     Args:

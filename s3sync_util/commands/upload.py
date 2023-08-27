@@ -10,7 +10,7 @@ from s3sync_util.commands.common import get_total_upload_objects, format_time
 from s3sync_util.commands.state_management import load_state, save_state, calculate_checksum
 
 
-def upload_to_s3(directory, s3_bucket, s3_prefix, exclude_list, dry_run=False, progress=False, verbose=False):
+def upload_to_s3(directory:str, s3_bucket:str, s3_prefix:str, exclude_list:list, dry_run:bool=False, progress:bool=False, verbose:bool=False) -> None:
     """Upload file(s) from a directory to an S3 bucket.
 
     Args:

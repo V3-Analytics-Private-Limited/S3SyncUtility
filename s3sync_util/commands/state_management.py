@@ -2,7 +2,7 @@ import os
 import json
 import hashlib
 
-def calculate_checksum(file_path, block_size=8192):
+def calculate_checksum(file_path:str, block_size:int=4096) -> str:
     """Calculate the MD5 checksum of a file.
 
     Args:
@@ -18,7 +18,7 @@ def calculate_checksum(file_path, block_size=8192):
             checksum.update(block)
     return checksum.hexdigest()
 
-def load_state():
+def load_state() -> dict:
     """
     Load the state from a JSON file.
 
@@ -36,7 +36,7 @@ def load_state():
     # If the file doesn't exist or there's an error, return an empty dictionary
     return {}
 
-def save_state(state):
+def save_state(state:dict) -> None:
     """
     Save the state to a JSON file.
 

@@ -2,7 +2,7 @@ import os
 import boto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError
 
-def get_total_upload_size(directory, exclude_list):
+def get_total_upload_size(directory:str, exclude_list:list) -> int:
     """Calculate the total size of files in a directory for upload, excluding specified files.
 
     Args:
@@ -12,7 +12,7 @@ def get_total_upload_size(directory, exclude_list):
     Returns:
         int: Total size of files in bytes.
     """
-    total_size = 0
+    total_size: int = 0
 
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in exclude_list]
@@ -23,7 +23,7 @@ def get_total_upload_size(directory, exclude_list):
 
     return total_size
 
-def get_total_download_size(s3_bucket, s3_prefix, exclude_list):
+def get_total_download_size(s3_bucket:str, s3_prefix:str, exclude_list:list) -> int:
     """Calculate the total size of objects to be downloaded from an S3 bucket and prefix.
 
     Args:
@@ -34,7 +34,7 @@ def get_total_download_size(s3_bucket, s3_prefix, exclude_list):
     Returns:
         int: Total size of objects in bytes.
     """
-    total_size = 0
+    total_size: int = 0
 
     try:
         s3 = boto3.client('s3')
@@ -47,7 +47,7 @@ def get_total_download_size(s3_bucket, s3_prefix, exclude_list):
         print(f"Error occurred: {e}")
     return total_size
 
-def format_size(size_in_bytes):
+def format_size(size_in_bytes:int) -> float:
     if size_in_bytes < 1024:
         return f"{size_in_bytes} bytes"
     elif size_in_bytes < 1024 * 1024:
