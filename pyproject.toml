@@ -3,8 +3,9 @@ name = "s3sync"
 version = "2.1.0"
 description = "Sync directories/files with Amazon S3."
 authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
+repository = "https://github.com/GeonsV3Collab/S3SyncUtility"
 license = "MIT"
-readme = "README.md"
+readme = ["README.md", "LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
