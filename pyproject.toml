@@ -8,7 +8,7 @@ license = "MIT"
 readme = ["README.md", "LICENSE"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 boto3 = "^1.28.30"
 configparser = "^6.0.0"
 
