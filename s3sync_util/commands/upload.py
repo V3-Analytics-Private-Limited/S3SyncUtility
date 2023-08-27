@@ -66,38 +66,39 @@ def upload_to_s3(directory:str, s3_bucket:str, s3_prefix:str, exclude_list:list,
                             file_size = os.path.getsize(local_path)
                             last_modified = os.path.getmtime(local_path)
                             # if local_path in state and local_checksum == state[local_path]['hash']:
-                            if local_checksum == state[local_path]['hash']:
+                            if local_checksum in state:
+                            # if state.get(local_path, {}).get('hash') == local_checksum:
                                 if verbose:
                                     print(f"Skipping {file} as it's already uploaded and unchanged.")
                                 skipped_files += 1
                                 continue
                             uploaded_files += 1
+                            if uploaded_files > skipped_files:
+                                progress_percentage = (uploaded_files / (total_files - skipped_files)) * 100
+                                remaining_files = total_files - uploaded_files
+                                time_elapsed = time.time() - start_time
+                                files_per_second = uploaded_files / time_elapsed
+                                time_remaining = remaining_files / files_per_second
+                                progress_line = f"Progress: {progress_percentage:.2f}% | Uploaded: {uploaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
+                            else:
+                                progress_percentage = 0
+                                time_remaining = -1
+                                progress_line = f"Progress: {progress_percentage:.2f}% | Uploaded: {uploaded_files}/{total_files} | Remaining: N/A"
                             if progress:
-                                if uploaded_files > skipped_files:
-                                    progress_percentage = (uploaded_files / (total_files - skipped_files)) * 100
-                                    remaining_files = total_files - uploaded_files
-                                    time_elapsed = time.time() - start_time
-                                    files_per_second = uploaded_files / time_elapsed
-                                    time_remaining = remaining_files / files_per_second
-                                    progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {uploaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
-                                else:
-                                    progress_percentage = 0
-                                    time_remaining = -1
-                                    progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {uploaded_files}/{total_files} | Remaining: N/A"
-                                    sys.stdout.write("\r" + progress_line)
-                                    sys.stdout.flush()
+                                sys.stdout.write("\r" + progress_line)
+                                sys.stdout.flush()
 
-                                if dry_run:
-                                    print(f"\nSimulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")
-                                else:
-                                    # print(f"Uploading {file} to S3 bucket {s3_bucket}")
-                                    if verbose:
-                                        print(f"\nUploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
-                                    s3.upload_file(local_path, s3_bucket, s3_key)
-                                    last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
-                                    state[local_path] = {'hash': local_checksum, 'size': file_size, 'last_modified': last_modified_formated, 'extension': os.path.splitext(file)[1]}
-                                    if verbose:
-                                        print(f"\nUploaded {file} as {s3_key}")
+                            if dry_run:
+                                print(f"\nSimulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")
+                            else:
+                                # print(f"Uploading {file} to S3 bucket {s3_bucket}")
+                                if verbose:
+                                    print(f"\nUploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
+                                s3.upload_file(local_path, s3_bucket, s3_key)
+                                # last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
+                                state[local_checksum] = {'file': local_path, 'size': file_size, 'last_modified': last_modified, 'extension': os.path.splitext(file)[1]}
+                                if verbose:
+                                    print(f"\nUploaded {file} as {s3_key}")
                 save_state(state)
                 print("\nUpload completed.")
             except (BotoCoreError, NoCredentialsError) as e:

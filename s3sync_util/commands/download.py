@@ -59,8 +59,8 @@ def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:l
                         remote_etag = obj.get('ETag', '').strip('"')
                         last_modified = obj.get('LastModified', None)
                         if os.path.exists(local_path):
-                            local_checksum = state.get(local_path, {}).get('hash', '')
-                            if local_checksum == remote_etag:
+                            # local_checksum = state.get(local_path, {}).get('hash', '')
+                            if remote_etag in state:
                                 if verbose:
                                     print(f"Skipping {s3_key} as it's already downloaded and unchanged.")
                                 skipped_files += 1
