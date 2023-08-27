@@ -4,9 +4,9 @@ import time
 import boto3
 
 from botocore.exceptions import BotoCoreError, NoCredentialsError
-from s3sync.commands.state_management import load_state, save_state
-from s3sync.commands.size import get_total_download_size, format_size
-from s3sync.commands.common import get_total_download_objects, format_time
+from s3sync_util.commands.state_management import load_state, save_state
+from s3sync_util.commands.size import get_total_download_size, format_size
+from s3sync_util.commands.common import get_total_download_objects, format_time
 
 
 def download_from_s3(s3_bucket, s3_prefix, directory, exclude_list, dry_run=False, progress=False, verbose=False):

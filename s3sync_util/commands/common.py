@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import boto3
 
-from s3sync.commands.state_management import calculate_checksum
+from s3sync_util.commands.state_management import calculate_checksum
 def get_total_upload_objects(directory, exclude_list):
     """Count the total number of objects (files and directories) in a directory.
 

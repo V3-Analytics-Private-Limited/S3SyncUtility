@@ -2,8 +2,8 @@ import argparse
 import os
 import sys
 
-from s3sync.config import utils
-from s3sync.commands import upload, download
+from s3sync_util.config import utils
+from s3sync_util.commands import upload, download
 
 
 def main():
