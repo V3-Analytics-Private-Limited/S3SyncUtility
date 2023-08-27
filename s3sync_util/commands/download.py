@@ -67,20 +67,20 @@ def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:l
                                 continue
                         # Download the file(s)
                         downloaded_files += 1
+                        if downloaded_files > skipped_files:
+                            progress_percentage = (downloaded_files / (total_files - skipped_files)) * 100
+                            remaining_files = total_files - downloaded_files
+                            time_elapsed = time.time() - start_time
+                            files_per_second = downloaded_files / time_elapsed
+                            time_remaining = remaining_files / files_per_second
+                            progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {downloaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
+                        else:
+                            progress_percentage = 0
+                            time_remaining = -1
+                            progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {downloaded_files}/{total_files} | Remaining: N/A"
                         if progress:
-                            if downloaded_files > skipped_files:
-                                progress_percentage = (downloaded_files / (total_files - skipped_files)) * 100
-                                remaining_files = total_files - downloaded_files
-                                time_elapsed = time.time() - start_time
-                                files_per_second = downloaded_files / time_elapsed
-                                time_remaining = remaining_files / files_per_second
-                                progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {downloaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
-                            else:
-                                progress_percentage = 0
-                                time_remaining = -1
-                                progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {downloaded_files}/{total_files} | Remaining: N/A"
-                                sys.stdout.write("\r" + progress_line)
-                                sys.stdout.flush()
+                            sys.stdout.write("\r" + progress_line)
+                            sys.stdout.flush()
                         if dry_run:
                             print(f"\nSimulating: Would download {s3_key} from S3 bucket {s3_bucket} to {local_path}")
                         else:
@@ -92,7 +92,7 @@ def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:l
                             s3.download_file(s3_bucket, s3_key, local_path)
                             if verbose:
                                 print(f"\nDownloaded {s3_key} as {local_path}")
-                            state[local_path] = {'hash': remote_etag, 'last_modified': last_modified.isoformat(), 'extension': os.path.splitext(s3_key)[-1]}
+                            state[remote_etag] = {'file': local_path, 'last_modified': last_modified.isoformat(), 'extension': os.path.splitext(s3_key)[-1]}
                 save_state(state)
                 print("\nDownload completed.")
             except (BotoCoreError, NoCredentialsError) as e:
