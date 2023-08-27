@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 import boto3
 
+from s3sync.commands.state_management import calculate_checksum
 def get_total_upload_objects(directory, exclude_list):
     """Count the total number of objects (files and directories) in a directory.
 
@@ -47,3 +49,25 @@ def format_time(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return f"{int(h):02d}:{int(m):02d}:{int(s):02d}"
+
+def resolve_conflict(local_path, s3_key, s3_bucket, state, s3):
+    print(f"Conflict detected: {local_path} has been modified both locally and remotely.")
+    print(f"Local last modified: {datetime.fromtimestamp(os.path.getmtime(local_path))}")
+    print(f"Remote last modified: {datetime.fromisoformat(state[local_path]['last_modified'])}")
+
+    resolution_choice = input("Choose conflict resolution (local/remote/skip): ").lower()
+    if resolution_choice == 'local':
+        print(f"Uploading local version of {local_path}")
+        s3.upload_file(local_path, s3_bucket, s3_key)
+        last_modified_formatted = datetime.utcfromtimestamp(os.path.getmtime(local_path)).isoformat()
+        state[local_path]['hash'] = calculate_checksum(local_path)
+        state[local_path]['last_modified'] = last_modified_formatted
+        print(f"Uploaded local version of {local_path}")
+    elif resolution_choice == 'remote':
+        print(f"Downloading remote version of {local_path}")
+        s3.download_file(s3_bucket, s3_key, local_path)
+        print(f"Downloaded remote version of {local_path}")
+    elif resolution_choice == 'skip':
+        print(f"Skipping conflict file: {local_path}")
+    else:
+        print("Invalid resolution choice. Skipping conflict file.")
