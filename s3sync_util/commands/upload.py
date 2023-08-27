@@ -65,20 +65,27 @@ def upload_to_s3(directory:str, s3_bucket:str, s3_prefix:str, exclude_list:list,
                             local_checksum = calculate_checksum(local_path)
                             file_size = os.path.getsize(local_path)
                             last_modified = os.path.getmtime(local_path)
-                            if local_path in state and local_checksum == state[local_path]['hash']:
+                            # if local_path in state and local_checksum == state[local_path]['hash']:
+                            if local_checksum == state[local_path]['hash']:
                                 if verbose:
                                     print(f"Skipping {file} as it's already uploaded and unchanged.")
                                 skipped_files += 1
                                 continue
                             uploaded_files += 1
                             if progress:
-                                progress_percentage = ((uploaded_files - skipped_files) / (total_files - skipped_files)) * 100
-                                remaining_files = total_files - uploaded_files
-                                time_elapsed = time.time() - start_time
-                                time_remaining = (time_elapsed / (uploaded_files - skipped_files)) * remaining_files
-                                progress_line = f"Progress: {progress_percentage:.2f}% | Uploaded: {uploaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
-                                sys.stdout.write("\r" + progress_line)
-                                sys.stdout.flush()
+                                if uploaded_files > skipped_files:
+                                    progress_percentage = (uploaded_files / (total_files - skipped_files)) * 100
+                                    remaining_files = total_files - uploaded_files
+                                    time_elapsed = time.time() - start_time
+                                    files_per_second = uploaded_files / time_elapsed
+                                    time_remaining = remaining_files / files_per_second
+                                    progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {uploaded_files}/{total_files} | Remaining: {format_time(time_remaining)}"
+                                else:
+                                    progress_percentage = 0
+                                    time_remaining = -1
+                                    progress_line = f"Progress: {progress_percentage:.2f}% | Downloaded: {uploaded_files}/{total_files} | Remaining: N/A"
+                                    sys.stdout.write("\r" + progress_line)
+                                    sys.stdout.flush()
 
                                 if dry_run:
                                     print(f"\nSimulating: Would upload {file} to S3 bucket {s3_bucket} as {s3_key}")

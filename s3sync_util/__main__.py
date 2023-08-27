@@ -3,12 +3,14 @@ import os
 import sys
 
 from s3sync_util.config import utils
+from s3sync_util.__version__ import __version__
 from s3sync_util.commands import upload, download
 
 
 def main():
     """Main entry point for the S3Sync utility."""
     parser = argparse.ArgumentParser(description="Upload and download directories/files from Amazon S3")
+    parser.add_argument('--version', action='version', version=f'S3Sync Utility v{__version__}')
     subparsers = parser.add_subparsers(title='subcommands', dest='subcommand', description="Available subcommands for managing S3Sync:")
 
     config_parser = subparsers.add_parser(
