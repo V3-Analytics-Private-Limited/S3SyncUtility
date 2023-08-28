@@ -4,12 +4,13 @@ import time
 import boto3
 
 from botocore.exceptions import BotoCoreError, NoCredentialsError
+from s3sync_util.commands.multipart import multipart_download_from_s3
 from s3sync_util.commands.state_management import load_state, save_state
 from s3sync_util.commands.size import get_total_download_size, format_size
-from s3sync_util.commands.common import get_total_download_objects, format_time
+from s3sync_util.commands.common import get_total_download_objects, format_time, config
 
 
-def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:list, dry_run:bool=False, progress:bool=False, verbose:bool=False) -> None:
+def download_from_s3(s3_bucket: str, s3_prefix: str, directory: str, exclude_list: list, dry_run: bool=False, progress: bool=False, verbose: bool=False) -> None:
     """Download files(s) from an S3 bucket to a local directory.
     Args:
         s3_bucket (str): The name of the S3 bucket.
@@ -89,7 +90,13 @@ def download_from_s3(s3_bucket:str, s3_prefix:str, directory:str, exclude_list:l
                                 print(f"S3 Key: {s3_key}")
                                 print(f"Local Path: {local_path}")
                             os.makedirs(os.path.dirname(local_path), exist_ok=True)
-                            s3.download_file(s3_bucket, s3_key, local_path)
+                            response = s3.head_object(Bucket=s3_bucket, Key=s3_key)
+                            total_size = response['ContentLength']
+                            if total_size >= 100_000_000: # 100 MB
+                                print(f"\n{s3_key}'s size is over 100 MB, using multipart download for better transfer efficiency.")
+                                multipart_download_from_s3(local_path, s3, s3_bucket, s3_key, total_size)
+                            else:
+                                s3.download_file(s3_bucket, s3_key, local_path, Config=config)
                             if verbose:
                                 print(f"\nDownloaded {s3_key} as {local_path}")
                             state[remote_etag] = {'file': local_path, 'last_modified': last_modified.isoformat(), 'extension': os.path.splitext(s3_key)[-1]}

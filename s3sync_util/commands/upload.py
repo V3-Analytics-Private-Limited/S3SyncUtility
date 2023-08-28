@@ -5,8 +5,9 @@ import time
 from datetime import datetime
 
 from botocore.exceptions import BotoCoreError, NoCredentialsError
+from s3sync_util.commands.multipart import multipart_upload_to_s3
 from s3sync_util.commands.size import get_total_upload_size, format_size
-from s3sync_util.commands.common import get_total_upload_objects, format_time
+from s3sync_util.commands.common import get_total_upload_objects, format_time, config
 from s3sync_util.commands.state_management import load_state, save_state, calculate_checksum
 
 
@@ -94,9 +95,13 @@ def upload_to_s3(directory:str, s3_bucket:str, s3_prefix:str, exclude_list:list,
                                 # print(f"Uploading {file} to S3 bucket {s3_bucket}")
                                 if verbose:
                                     print(f"\nUploading {local_path} to S3 bucket {s3_bucket} with key {s3_key}")
-                                s3.upload_file(local_path, s3_bucket, s3_key)
-                                # last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
-                                state[local_checksum] = {'file': local_path, 'size': file_size, 'last_modified': last_modified, 'extension': os.path.splitext(file)[1]}
+                                if file_size >= 100_000_000: # 100 MB
+                                    print(f"\n{file}'s size is over 100 MB, using multipart upload for better transfer efficiency.")
+                                    multipart_upload_to_s3(local_path, s3, s3_bucket, s3_key)
+                                else:
+                                    s3.upload_file(local_path, s3_bucket, s3_key, Config=config)
+                                last_modified_formated = datetime.utcfromtimestamp(last_modified).isoformat()
+                                state[local_checksum] = {'file': local_path, 'size': file_size, 'last_modified': last_modified_formated, 'extension': os.path.splitext(file)[1]}
                                 if verbose:
                                     print(f"\nUploaded {file} as {s3_key}")
                 save_state(state)
