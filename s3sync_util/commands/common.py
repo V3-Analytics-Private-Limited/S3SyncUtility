@@ -1,6 +1,13 @@
 import os
 import boto3
 
+from boto3.s3.transfer import TransferConfig
+
+config = TransferConfig(multipart_threshold=1024 * 25, 
+                        max_concurrency=10,
+                        multipart_chunksize=1024 * 25,
+                        use_threads=True)
+
 def get_total_upload_objects(directory:str, exclude_list:list) -> int:
     """Count the total number of objects (files and directories) in a directory.
 
