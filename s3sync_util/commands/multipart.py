@@ -1,24 +1,18 @@
-from s3sync_util.commands.common import config
 from botocore.client import BaseClient
-from typing import Union
 
-
-def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: str, object_key: str):
+def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: str, s3_prefix: str):
     """
     Uploads a local file to S3 using multipart upload.
 
     Args:
         local_file_path (str): The path to the local file to be uploaded.
         s3 (BaseClient): An instance of the boto3 S3 client or resource.
-        object_key (str): The desired key for the uploaded object in the bucket.
+        s3_bucket (str): The name of the S3 bucket.
+        s3_prefix (str): The prefix to use for S3 object keys.
     """
-    if isinstance(s3, BaseClient):
-        s3_client = s3
-    else:
-        raise ValueError("s3 must be an instance of boto3 S3 client or resource")
 
     # Initialize multipart upload
-    response = s3_client.create_multipart_upload(Bucket=bucket_name, Key=object_key)
+    response = s3.create_multipart_upload(Bucket=bucket_name, Key=s3_prefix)
     upload_id = response['UploadId']
 
     # Calculate part size
@@ -32,9 +26,9 @@ def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: st
             data = file.read(part_size)
             if not data:
                 break
-            part_response = s3_client.upload_part(
+            part_response = s3.upload_part(
                 Bucket=bucket_name,
-                Key=object_key,
+                Key=s3_prefix,
                 PartNumber=part_number,
                 UploadId=upload_id,
                 Body=data
@@ -43,22 +37,22 @@ def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: st
             part_number += 1
 
     # Complete multipart upload
-    s3_client.complete_multipart_upload(
+    s3.complete_multipart_upload(
         Bucket=bucket_name,
-        Key=object_key,
+        Key=s3_prefix,
         UploadId=upload_id,
         MultipartUpload={'Parts': parts}
     )
 
-def multipart_download_from_s3(local_file_path: str, s3: BaseClient, bucket_name: str, object_key: str, total_size: int):
+def multipart_download_from_s3(local_file_path: str, s3: BaseClient, bucket_name: str, s3_prefix: str, total_size: int) -> None:
     """
     Downloads an object from S3 using multipart download.
 
     Args:
-        bucket_name (str): The name of the S3 bucket.
-        object_key (str): The key of the object to be downloaded.
         local_file_path (str): The desired path for the downloaded file.
         s3 (BaseClient): An instance of the boto3 S3 client or resource.
+        bucket_name (str): The name of the S3 bucket.
+        s3_prefix (str): The key of the object to be downloaded.
     """
     if isinstance(s3, BaseClient):
         s3_client = s3
@@ -79,7 +73,7 @@ def multipart_download_from_s3(local_file_path: str, s3: BaseClient, bucket_name
             end_byte = min(part_number * part_size, total_size) - 1
             response = s3_client.get_object(
                 Bucket=bucket_name,
-                Key=object_key,
+                Key=s3_prefix,
                 Range=f"bytes={start_byte}-{end_byte}"
             )
             file.write(response['Body'].read())

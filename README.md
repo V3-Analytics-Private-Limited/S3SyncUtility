@@ -45,6 +45,16 @@ Before using the utility, make sure you have the required dependencies installed
     s3sync download --s3-bucket <bucket_name> --s3-prefix <prefix> --directory <local_directory>
     ```
 
+## Versioning Example
+
+- Major version bump: `v1.0.0` (Breaking backward compatibility)
+- Minor version bump: `v1.1.0` (Backward-compatible new features)
+- Patch version bump: `v1.1.1` (Backward-compatible bug fixes)
+- Alpha release: `v2.0.0-alpha` (Initial development)
+- Beta release: `v2.0.0-beta` (Feature-complete, testing phase)
+- Dev version: `v2.0.0-dev` (Development version)
+- Stable release: `v2.0.0` (Production-ready)
+
 ## License
 
 This project is licensed under the [MIT License](License).
