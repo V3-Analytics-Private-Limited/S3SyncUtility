@@ -2,56 +2,59 @@
 
 **S3SyncUtility** is a Python tool using Boto3 to simplify syncing local directories with Amazon S3, for easy uploads and downloads.
 
-## Prerequisites
+## Installation
 
-- **Python 3.9 or higher**
-- **Boto3** (Install using `pip install boto3`)
-- **Configuration file parser** (Install using `pip install configparser`)
+You can install S3Sync using `pip` by providing the Git repository URL:
 
-## Configuration (`.config.ini`)
+```bash
+pip install git+https://github.com/GeonsV3Collab/S3SyncUtility.git@development
 
-The `.config.ini` file lets you customize your interaction with the S3 bucket.
+or
 
-### S3 Configuration
-
-- `S3_BUCKET_NAME`: Name of your S3 bucket.
-- `S3_PREFIX_TYPE`: Choose between "**internal**" or "**external**".
-- `S3_PREFIX_CATEGORY`: Select from "**datasets**" or "**models**".
-- `PROJECT_NAME`: Name of your project.
-- `EXCLUDE` (optional): Specify files or directories to exclude.
-
-**Example:**
-
-```ini
-[S3_CONFIG]
-S3_BUCKET_NAME=my-bucket
-S3_PREFIX_TYPE=internal
-S3_PREFIX_CATEGORY=datasets
-PROJECT_NAME=my_project
-EXCLUDE=file1,dir2
+pip install s3sync_util
 ```
+
+
+## Configuration
+
+Initialize the S3Sync configuration:
+
+```markdown
+s3sync config init
+```
+This will interactively create a `.config.ini` file with your S3 bucket and prefix settings.
+
+1. Modify **\`.config.ini`**:
+
+    You can manually edit the **\`.config.ini`** file to change the configuration options.
+
 
 ## Usage
 
-To use the script, run it from the command line with the following options:
+Before using the utility, make sure you have the required dependencies installed.
 
-```bash
-python main.py --upload
-python main.py --download
-```
+1. To upload **files/directories** to S3:
 
-## Command-line Arguments
+    ```markdown
+    s3sync upload --directory <local_directory> --s3-bucket <bucket_name> --s3-prefix <prefix>
+    ```
 
-- `--upload`: Upload directories/files to Amazon S3.
+2. To download **files/directories** from S3:
 
-- `--download`: Download directories/files from Amazon S3.
+    ```markdown
+    s3sync download --s3-bucket <bucket_name> --s3-prefix <prefix> --directory <local_directory>
+    ```
 
-- `--exclude`: Exclude specific files or directories from upload/download. 
+## Versioning Example
 
-**Example:**
+- Major version bump: `v1.0.0` (Breaking backward compatibility)
+- Minor version bump: `v1.1.0` (Backward-compatible new features)
+- Patch version bump: `v1.1.1` (Backward-compatible bug fixes)
+- Alpha release: `v2.0.0-alpha` (Initial development)
+- Beta release: `v2.0.0-beta` (Feature-complete, testing phase)
+- Dev version: `v2.0.0-dev` (Development version)
+- Stable release: `v2.0.0` (Production-ready)
 
-```bash
-python main.py --upload --exclude file1 dir2
-```
+## License
 
-This will upload directories/files to Amazon S3 while excluding `file1` and `dir2`.
+This project is licensed under the [MIT License](License).
