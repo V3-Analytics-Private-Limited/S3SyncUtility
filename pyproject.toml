@@ -1,17 +1,20 @@
 [tool.poetry]
-name = "s3syncutility"
-version = "0.1.0"
-description = "Sync local directories with Amazon S3."
+name = "s3sync_util"
+version = "2.3.0-dev"
+description = "Sync directories/files with Amazon S3."
 authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
+repository = "https://github.com/GeonsV3Collab/S3SyncUtility"
 license = "MIT"
-readme = "README.md"
+readme = ["README.md", "LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 boto3 = "^1.28.30"
 configparser = "^6.0.0"
 
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+s3sync = "s3sync_util.__main__:main"
