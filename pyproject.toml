@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "s3sync_util"
-version = "2.3.1"
+version = "2.3.2"
 description = "Sync directories/files with Amazon S3."
 authors = ["Lakshmi Narasimman <lakshminarasimman@v3analytics.in>"]
 repository = "https://github.com/GeonsV3Collab/S3SyncUtility"
@@ -17,4 +17,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-s3sync = "s3sync_util.__main__:main"
+s3sync = "s3sync_util.__main__:cli"
