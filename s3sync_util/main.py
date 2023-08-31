@@ -4,6 +4,7 @@ import sys
 
 from s3sync_util.config import utils
 from s3sync_util.__version__ import __version__
+from s3sync_util.commands import ls
 from s3sync_util.commands import upload, download
 
 
@@ -57,6 +58,18 @@ def cli():
     download_parser.add_argument("--verbose", help="Verbosity of the download process", action="store_true")
     download_parser.set_defaults(func=lambda args: download.download_from_s3(
         args.s3_bucket, args.s3_prefix, args.directory, args.exclude + exclude_list, args.dry_run, args.progress, args.verbose
+    ))
+
+    list_parser = subparsers.add_parser(
+        'list',
+        help='List contents in an S3 bucket or path',
+        description='List the contents of an S3 bucket or a specific path within the bucket.'
+    )
+
+    list_parser.add_argument("--s3-bucket", help="S3 bucket to list contents from", default=s3_bucket)
+    list_parser.add_argument("--path", help=f"Path within the S3 bucket to list contents from. Default: {s3_prefix}", default=s3_prefix)
+    list_parser.set_defaults(func=lambda args: ls.list_s3_contents(
+        args.s3_bucket, args.path
     ))
 
     args = parser.parse_args()
