@@ -1,4 +1,5 @@
 from botocore.client import BaseClient
+from ..logger import logger
 
 def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: str, s3_prefix: str):
     """
@@ -10,7 +11,7 @@ def multipart_upload_to_s3(local_file_path: str, s3: BaseClient, bucket_name: st
         s3_bucket (str): The name of the S3 bucket.
         s3_prefix (str): The prefix to use for S3 object keys.
     """
-
+    logger.info("multipart upload starts.")
     # Initialize multipart upload
     response = s3.create_multipart_upload(Bucket=bucket_name, Key=s3_prefix)
     upload_id = response['UploadId']
@@ -57,6 +58,7 @@ def multipart_download_from_s3(local_file_path: str, s3: BaseClient, bucket_name
     if isinstance(s3, BaseClient):
         s3_client = s3
     else:
+        logger.error("s3 must be an instance of boto3 S3 client or resource.")
         raise ValueError("s3 must be an instance of boto3 S3 client or resource")
 
     # Get object information to determine the total size

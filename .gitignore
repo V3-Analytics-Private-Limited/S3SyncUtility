@@ -2,10 +2,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*__init__
+*.lock
+*.log
 # C extensions
 *.so
-
+*.gitignore
+dist/
+.git/
 # Distribution / packaging
 .Python
 build/
