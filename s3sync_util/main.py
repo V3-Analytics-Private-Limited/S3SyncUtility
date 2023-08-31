@@ -1,18 +1,22 @@
 import argparse
 import os
 import sys
-
 from s3sync_util.config import utils
 from s3sync_util.__version__ import __version__
 from s3sync_util.commands import upload, download
+from .logger import logger
 
+def get_logs():
+    file = open("logs.log", mode="r")
+    print("\n\t---------------------------LOGS-----------------------------\n")
+    for each_log in file:
+        print(each_log)
 
 def cli():
     """Main entry point for the S3Sync utility."""
-    parser = argparse.ArgumentParser(description="Upload and download directories/files from Amazon S3")
+    parser = argparse.ArgumentParser(description="Upload and download directories/files from Amazon S3") 
     parser.add_argument('--version', action='version', version=f'S3Sync Utility v{__version__}')
     subparsers = parser.add_subparsers(title='subcommands', dest='subcommand', description="Available subcommands for managing S3Sync:")
-
     config_parser = subparsers.add_parser(
         'config',
         help='Manage the S3Sync configuration',
@@ -30,7 +34,7 @@ def cli():
         help='Upload directories/files to S3',
         description='Seamlessly upload directories and files to Amazon S3. Whether you\'re backing up important data or distributing assets, this command streamlines the process by securely transferring your content to the cloud. You can define upload options, such as storage classes and encryption, to align with your data management strategies.'
     )
-
+    upload_parser.add_argument('--log', action='store_true', help='Show all logs')   
     upload_parser.add_argument("--directory", help="Local directory to upload", default=directory)
     upload_parser.add_argument("--s3-bucket", help="S3 bucket to upload to", default=s3_bucket)
     upload_parser.add_argument("--s3-prefix", help="Prefix to use for S3 object keys", default=s3_prefix)
@@ -47,7 +51,7 @@ def cli():
         help='Download directories/files from S3',
         description='Effortlessly retrieve directories and files from Amazon S3 to your local environment. Whether you\'re restoring backups or accessing shared resources, this command simplifies the retrieval process. Customize download preferences such as overwriting rules and filtering to ensure you have the right files where you need them.'
     )
-
+    download_parser.add_argument('--log', action='store_true', help='Show all logs')   
     download_parser.add_argument("--s3-bucket", help="S3 bucket to download from", default=s3_bucket)
     download_parser.add_argument("--s3-prefix", help="Prefix to use for S3 object keys", default=s3_prefix)
     download_parser.add_argument("--directory", help="Local directory to save downloaded files", default=directory)
@@ -66,10 +70,13 @@ def cli():
             args.func()
     elif hasattr(args, 'func'):
         try:
+            if args.subcommand == 'download' and args.log or args.subcommand == 'upload' and args.log:
+                return get_logs()
             args.func(args)
         except Exception as e:
             print(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e} (3)")
             sys.exit(1)
 
 if __name__ == "__main__":
-    cli()
+   cli()

@@ -1,6 +1,7 @@
 import os
 import boto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError
+from ..logger import logger
 
 def get_total_upload_size(directory:str, exclude_list:list) -> int:
     """Calculate the total size of files in a directory for upload, excluding specified files.
@@ -20,7 +21,6 @@ def get_total_upload_size(directory:str, exclude_list:list) -> int:
             if file not in exclude_list:
                 file_path = os.path.join(root, file)
                 total_size += os.path.getsize(file_path)
-
     return total_size
 
 def get_total_download_size(s3_bucket:str, s3_prefix:str, exclude_list:list) -> int:
@@ -43,7 +43,9 @@ def get_total_download_size(s3_bucket:str, s3_prefix:str, exclude_list:list) -> 
             s3_key = obj['Key']
             if not any(item in s3_key for item in exclude_list):
                 total_size += obj['Size']
+        
     except (BotoCoreError, NoCredentialsError) as e:
+        logger.error(f"Error occurred :{e} (2)")
         print(f"Error occurred: {e}")
     return total_size
 

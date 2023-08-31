@@ -1,6 +1,7 @@
 import os
 import json
 import hashlib
+from ..logger import logger
 
 def calculate_checksum(file_path:str, block_size:int=4096) -> str:
     """Calculate the MD5 checksum of a file.
@@ -30,10 +31,13 @@ def load_state() -> dict:
         if os.path.exists(state_file_path):
             with open(state_file_path, 'r') as state_file:
                 return json.load(state_file)
+            
     except (IOError, json.JSONDecodeError) as e:
+        logger.error(f"Error occurred while loading state: {e}")
         print(f"Error occurred while loading state: {e}")
 
     # If the file doesn't exist or there's an error, return an empty dictionary
+    logger.warning("file doesn't exist or there's an error , {}")
     return {}
 
 def save_state(state:dict) -> None:
@@ -48,4 +52,5 @@ def save_state(state:dict) -> None:
         with open(state_file_path, 'w') as state_file:
             json.dump(state, state_file, indent=4)
     except IOError as e:
+        logger.error(f"Error occurred while saving state: {e}")
         print(f"Error occurred while saving state: {e}")

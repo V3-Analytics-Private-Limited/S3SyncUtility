@@ -1,4 +1,3 @@
-from .main import cli
+from s3sync_util.main import cli
 
-if __name__ == "__main__":
-  cli()
+cli()
